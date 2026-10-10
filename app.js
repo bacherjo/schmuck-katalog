@@ -70,6 +70,28 @@ $("#loginForm").addEventListener("submit",async e=>{
     err.hidden=false;
   } else { $("#loginPassword").value=""; }
 });
+$("#googleBtn").onclick=async()=>{
+  const err=$("#loginError"); err.hidden=true; $("#googleBtn").disabled=true;
+  const {error}=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+  if(error){
+    $("#googleBtn").disabled=false;
+    err.textContent=/provider is not enabled|Unsupported provider/i.test(error.message)
+      ?"Die Google-Anmeldung ist in Supabase noch nicht eingeschaltet."
+      :"Google-Anmeldung fehlgeschlagen: "+error.message;
+    err.hidden=false;
+  }
+};
+// After returning from Google: show why a sign-in was refused, then tidy the address bar.
+(function(){
+  const params=new URLSearchParams((location.hash||"").replace(/^#/,"")+"&"+(location.search||"").replace(/^\?/,""));
+  const desc=params.get("error_description"); if(!desc) return;
+  const err=$("#loginError");
+  err.textContent=/signup|sign up|not allowed/i.test(desc)
+    ?"Dieses Google-Konto hat keinen Zugang zum Katalog. Bitte zuerst in Supabase einen Benutzer mit dieser E-Mail-Adresse anlegen."
+    :"Google-Anmeldung fehlgeschlagen: "+desc.replace(/\+/g," ");
+  err.hidden=false;
+  history.replaceState(null,"",location.pathname);
+})();
 $("#logoutBtn").onclick=()=>guard(async()=>{await cleanupPending();await sb.auth.signOut();});
 
 async function showApp(){

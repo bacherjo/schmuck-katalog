@@ -113,6 +113,23 @@ All pieces and photos are copied over. If something goes wrong, simply import th
 
 ---
 
+## Optional: sign in with Google
+
+The login page has a **Mit Google anmelden** button. To make it work:
+
+1. **Google Cloud** (https://console.cloud.google.com):
+   - Create a project (e.g. `schmuck-katalog`).
+   - **APIs & Services → OAuth consent screen**: app name e.g. "Schmuckkatalog", your e-mail as support contact, user type **External**. Publish the app (otherwise only listed test users can sign in).
+   - **APIs & Services → Credentials → Create credentials → OAuth client ID**, type **Web application**.
+   - Under **Authorized redirect URIs** add: `https://aiehswbjqmchwfuwrxoz.supabase.co/auth/v1/callback`
+   - Copy the **Client ID** and **Client secret**.
+2. **Supabase → Authentication → Sign In / Providers → Google**: turn it on, paste Client ID and Client secret, save.
+3. **Supabase → Authentication → URL Configuration**:
+   - **Site URL**: your Vercel address, e.g. `https://fanijansen.vercel.app`
+   - **Redirect URLs**: add the same address (and any other address you use, e.g. a custom domain).
+
+**Who can sign in with Google:** only people who already have a user in Supabase (Authentication → Users) with the **same e-mail address** as their Google account, as long as "Allow new users to sign up" stays **off**. Anyone else gets the message "Dieses Google-Konto hat keinen Zugang zum Katalog".
+
 ## Day-to-day use
 
 - **Backups:** click **Save backup file** below the list every few weeks. The file contains all pieces and photos. Keep a copy somewhere safe (USB stick, cloud). It can be loaded again with **Import backup / export file**.
