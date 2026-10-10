@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Jewellery Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: workbench — a narrow tray of pieces on the left, the record card on the right; stacks on phones. */
+:root{
+  --bg:#eceeed; --surface:#fbfcfb; --sunk:#e2e5e4; --line:#cdd2d0;
+  --fg:#1d2121; --muted:#5f6866; --accent:#5b2a4c; --accent-fg:#ffffff;
+  --metal:#9a7428; --bad:#a3302b;
+  --f-display:"Bodoni Moda", "Didot", Georgia, serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:6px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#141517; --surface:#1d1f22; --sunk:#26292d; --line:#363a3f;
+  --fg:#eceef0; --muted:#9aa2a8; --accent:#d9a6c9; --accent-fg:#1d1219;
+  --metal:#d6b46b; --bad:#ec8a84; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:20px 48px}
+img{max-width:100%}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+.top-right{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.workshop{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.workshop input{width:200px;max-width:55vw}
+.who{font-size:12.5px;color:var(--muted)}
+.app{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:840px){.app{grid-template-columns:minmax(0,1fr)}}
+.tray{display:flex;flex-direction:column;gap:12px;position:sticky;top:12px}
+@media (max-width:840px){.tray{position:static}}
+.tray-tools{display:flex;gap:8px}
+.tray-tools input{flex:1;min-width:0}
+.list{display:flex;flex-direction:column;gap:6px;max-height:64vh;overflow:auto;padding-right:2px}
+@media (max-width:840px){.list{max-height:none}}
+.item{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px;border:1px solid transparent;border-radius:var(--r);background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;width:100%}
+.item:hover{background:var(--surface);border-color:var(--line)}
+.item[aria-current="true"]{background:var(--surface);border-color:var(--accent)}
+.thumb{width:56px;height:56px;border-radius:4px;background:var(--sunk);object-fit:cover;display:block}
+.thumb.empty{display:grid;place-items:center;color:var(--muted);font-size:11px}
+.item-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.item-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-price{font-family:var(--f-mono);font-size:13px;color:var(--metal);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tray-foot{display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--muted)}
+.tray-foot .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.empty-state{padding:20px 14px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:22px;min-width:0}
+.card-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
+.card-head .meta{font-size:12.5px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+label,.lbl{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+input,textarea{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 11px;width:100%;min-width:0}
+#f-name{font-family:var(--f-display);font-size:24px;padding:8px 11px;line-height:1.2}
+textarea{min-height:140px;resize:vertical;line-height:1.5}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[aria-invalid="true"]{border-color:var(--bad)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
+.costs{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.costs .field{width:min(380px,100%)}
+.costs .field.wide-text{width:min(600px,100%)}
+.costs textarea{min-height:96px}
+.costs .pair{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 16px;width:100%}
+.costs .pair .field.euro{width:min(200px,100%)}
+.euro input{text-align:right}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.unit{position:relative}
+.unit input{padding-right:36px}
+.unit span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.foot-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end;border-top:1px solid var(--line);padding-top:18px}
+.price{width:min(260px,100%);margin-left:auto}
+.price label{color:var(--fg)}
+.price input{font-family:var(--f-mono);font-size:22px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums;padding-block:10px;border-color:var(--metal);background:var(--surface);cursor:default}
+.price .unit span{font-size:18px}
+.kommentar{width:min(600px,100%)}
+.kommentar textarea{min-height:110px}
+button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--fg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:500}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad)}
+.btn.danger.armed{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn.link{border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;font-size:12.5px}
+.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.slot{position:relative;aspect-ratio:4/3;max-width:100%;border:1px dashed var(--line);border-radius:var(--r);background:var(--sunk);overflow:hidden;display:grid;place-items:center}
+.slot img{width:100%;height:100%;object-fit:contain;display:block}
+.slot .add{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-align:center;padding:12px;cursor:pointer;width:100%;height:100%;justify-content:center;border:0;background:transparent}
+.slot .add:hover{color:var(--fg)}
+.slot .add b{font-size:26px;font-weight:300;line-height:1}
+.slot .rm{position:absolute;top:8px;right:8px}
+.slot.drag{border-color:var(--accent);border-style:solid}
+.hint{font-size:12.5px;color:var(--muted)}
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--sunk);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;z-index:10;max-width:calc(100vw - 32px)}
+.notice{font-size:14px;color:var(--fg);background:var(--sunk);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+/* login */
+.login{max-width:380px;margin:8vh auto 0;display:flex;flex-direction:column;gap:18px}
+.login h1{font-size:34px}
+.login form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:14px}
+.login .err{color:var(--bad);font-size:13.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- Shown when config.js is not filled in -->
+<div class="wrap" id="configView" hidden>
+  <h1>Jewellery Catalogue</h1>
+  <div class="notice">The catalogue isn't connected to Supabase yet. Open <b>config.js</b> in GitHub and paste in your Supabase project URL and publishable key (README.md, step 2).</div>
+</div>
+
+<!-- Login -->
+<div class="login" id="loginView" hidden>
+  <div class="brand">
+    <span class="eyebrow">Goldsmith's workshop</span>
+    <h1>Jewellery Catalogue</h1>
+  </div>
+  <form id="loginForm">
+    <div class="field"><label for="loginEmail">E-Mail</label><input id="loginEmail" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="loginPassword">Passwort</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+    <span class="err" id="loginError" hidden></span>
+    <button class="btn primary" type="submit" id="loginBtn">Anmelden</button>
+  </form>
+</div>
+
+<!-- Catalogue -->
+<div class="wrap" id="appView" hidden>
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow" id="workshopEyebrow">Goldsmith's workshop</span>
+      <h1>Jewellery Catalogue</h1>
+    </div>
+    <div class="top-right">
+      <div class="workshop">
+        <label for="workshopName">Workshop name on PDFs</label>
+        <input id="workshopName" placeholder="e.g. Atelier Bacher">
+      </div>
+      <span class="who" id="who"></span>
+      <button class="btn small" type="button" id="logoutBtn">Abmelden</button>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="tray">
+      <div class="tray-tools">
+        <input id="search" type="search" placeholder="Search all fields…" aria-label="Search pieces">
+        <button class="btn primary" id="newBtn" type="button">+ New</button>
+      </div>
+      <div class="list" id="list"><div class="empty-state">Loading your pieces…</div></div>
+      <div class="tray-foot">
+        <div class="row"><span id="count">0 pieces</span></div>
+        <div class="row"><button class="btn small" id="exportAll" type="button">Download whole catalogue (PDF)</button></div>
+        <div class="row">
+          <button class="btn link" id="backupBtn" type="button">Save backup file</button>
+          <button class="btn link" id="importBtn" type="button">Import backup / export file</button>
+          <input type="file" id="importInput" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <form class="card" id="form" autocomplete="off">
+        <div class="card-head">
+          <span class="meta" id="headMeta">New piece</span>
+          <div class="actions">
+            <button class="btn" type="button" id="pdfBtn">Download PDF</button>
+            <button class="btn primary" type="submit" id="saveBtn">Save piece</button>
+          </div>
+        </div>
+
+        <div class="banner" id="dirtyBanner" hidden>
+          <span>You have unsaved changes on this piece.</span>
+          <span class="actions">
+            <button class="btn small" type="button" id="discardBtn">Discard changes</button>
+            <button class="btn small primary" type="button" id="saveSwitchBtn">Save and continue</button>
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" placeholder="z. B. Siegelring mit Onyx">
+        </div>
+
+        <div class="field">
+          <span class="lbl">Photos</span>
+          <div class="photos" id="photos"></div>
+          <span class="hint">Up to two photos. Click a frame or drop an image onto it.</span>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+
+        <div class="field">
+          <label for="f-beschreibung">Beschreibung</label>
+          <textarea id="f-beschreibung"></textarea>
+        </div>
+
+        <hr class="sep">
+
+        <div class="costs">
+          <div class="field wide-text"><label for="f-steine">Steine</label><textarea id="f-steine" aria-describedby="steine-hint"></textarea><span class="hint" id="steine-hint">Preis, Karat, Größe, wann bei wem gekauft</span></div>
+          <div class="pair">
+            <div class="field"><label for="f-gold">Gold</label><input id="f-gold" aria-describedby="gold-hint"><span class="hint" id="gold-hint">Datum und Preis</span></div>
+            <div class="field euro"><label for="f-gold_preis">Preis</label><div class="unit"><input id="f-gold_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-fasser">Fasser</label><input id="f-fasser"></div>
+            <div class="field euro"><label for="f-fasser_preis">Preis</label><div class="unit"><input id="f-fasser_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-druck">3D Druck</label><input id="f-druck"></div>
+            <div class="field euro"><label for="f-druck_preis">Preis</label><div class="unit"><input id="f-druck_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-willi">Willi (AZ/Material)</label><input id="f-willi"></div>
+            <div class="field euro"><label for="f-willi_preis">Preis</label><div class="unit"><input id="f-willi_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="f-arbeitszeit">Arbeitszeit</label><input id="f-arbeitszeit" aria-describedby="zeit-hint"><span class="hint" id="zeit-hint">1 Std = 120 Eur</span></div>
+            <div class="field euro"><label for="f-arbeitszeit_preis">Preis</label><div class="unit"><input id="f-arbeitszeit_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
+        </div>
+
+        <div class="foot-row">
+          <button class="btn danger" type="button" id="deleteBtn">Delete piece</button>
+          <div class="field price">
+            <label for="f-verkaufspreis">Verkaufspreis</label>
+            <div class="unit"><input id="f-verkaufspreis" readonly tabindex="-1" placeholder="0,00" aria-describedby="price-hint"><span>€</span></div>
+            <span class="hint" id="price-hint" style="text-align:right">Summe aller Preis-Felder</span>
+          </div>
+        </div>
+
+        <div class="field kommentar"><label for="f-kommentar">Kommentar</label><textarea id="f-kommentar"></textarea></div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
