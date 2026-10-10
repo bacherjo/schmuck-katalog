@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Jewellery Catalogue</title>
+<title>Schmuckkatalog</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -86,6 +86,8 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
 .price .unit span{font-size:18px}
 .kommentar{width:min(600px,100%)}
 .kommentar textarea{min-height:110px}
+.save-row{display:flex;justify-content:flex-end;border-top:1px solid var(--line);padding-top:18px}
+.btn.save{padding:11px 22px;font-size:15px}
 button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 .btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{border-color:var(--fg)}
@@ -120,15 +122,15 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 
 <!-- Shown when config.js is not filled in -->
 <div class="wrap" id="configView" hidden>
-  <h1>Jewellery Catalogue</h1>
-  <div class="notice">The catalogue isn't connected to Supabase yet. Open <b>config.js</b> in GitHub and paste in your Supabase project URL and publishable key (README.md, step 2).</div>
+  <h1>Schmuckkatalog</h1>
+  <div class="notice">Der Katalog ist noch nicht mit Supabase verbunden. Öffnen Sie <b>config.js</b> auf GitHub und tragen Sie die Projekt-URL und den Publishable Key Ihres Supabase-Projekts ein (README.md, Schritt 2).</div>
 </div>
 
 <!-- Login -->
 <div class="login" id="loginView" hidden>
   <div class="brand">
-    <span class="eyebrow">Goldsmith's workshop</span>
-    <h1>Jewellery Catalogue</h1>
+    <span class="eyebrow">Goldschmiede</span>
+    <h1>Schmuckkatalog</h1>
   </div>
   <form id="loginForm">
     <div class="field"><label for="loginEmail">E-Mail</label><input id="loginEmail" type="email" autocomplete="username" required></div>
@@ -142,13 +144,13 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 <div class="wrap" id="appView" hidden>
   <header class="top">
     <div class="brand">
-      <span class="eyebrow" id="workshopEyebrow">Goldsmith's workshop</span>
-      <h1>Jewellery Catalogue</h1>
+      <span class="eyebrow" id="workshopEyebrow">Goldschmiede</span>
+      <h1>Schmuckkatalog</h1>
     </div>
     <div class="top-right">
       <div class="workshop">
-        <label for="workshopName">Workshop name on PDFs</label>
-        <input id="workshopName" placeholder="e.g. Atelier Bacher">
+        <label for="workshopName">Werkstattname auf PDFs</label>
+        <input id="workshopName" placeholder="z. B. Atelier Bacher">
       </div>
       <span class="who" id="who"></span>
       <button class="btn small" type="button" id="logoutBtn">Abmelden</button>
@@ -158,16 +160,16 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
   <div class="app">
     <aside class="tray">
       <div class="tray-tools">
-        <input id="search" type="search" placeholder="Search all fields…" aria-label="Search pieces">
-        <button class="btn primary" id="newBtn" type="button">+ New</button>
+        <input id="search" type="search" placeholder="Alle Felder durchsuchen…" aria-label="Stücke durchsuchen">
+        <button class="btn primary" id="newBtn" type="button">+ Neu</button>
       </div>
-      <div class="list" id="list"><div class="empty-state">Loading your pieces…</div></div>
+      <div class="list" id="list"><div class="empty-state">Stücke werden geladen…</div></div>
       <div class="tray-foot">
-        <div class="row"><span id="count">0 pieces</span></div>
-        <div class="row"><button class="btn small" id="exportAll" type="button">Download whole catalogue (PDF)</button></div>
+        <div class="row"><span id="count">0 Stücke</span></div>
+        <div class="row"><button class="btn small" id="exportAll" type="button">Ganzen Katalog herunterladen (PDF)</button></div>
         <div class="row">
-          <button class="btn link" id="backupBtn" type="button">Save backup file</button>
-          <button class="btn link" id="importBtn" type="button">Import backup / export file</button>
+          <button class="btn link" id="backupBtn" type="button">Sicherungsdatei speichern</button>
+          <button class="btn link" id="importBtn" type="button">Sicherung / Export importieren</button>
           <input type="file" id="importInput" accept=".json,application/json" hidden>
         </div>
       </div>
@@ -176,18 +178,17 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
     <main>
       <form class="card" id="form" autocomplete="off">
         <div class="card-head">
-          <span class="meta" id="headMeta">New piece</span>
+          <span class="meta" id="headMeta">Neues Stück</span>
           <div class="actions">
-            <button class="btn" type="button" id="pdfBtn">Download PDF</button>
-            <button class="btn primary" type="submit" id="saveBtn">Save piece</button>
+            <button class="btn" type="button" id="pdfBtn">PDF herunterladen</button>
           </div>
         </div>
 
         <div class="banner" id="dirtyBanner" hidden>
-          <span>You have unsaved changes on this piece.</span>
+          <span>Dieses Stück hat ungespeicherte Änderungen.</span>
           <span class="actions">
-            <button class="btn small" type="button" id="discardBtn">Discard changes</button>
-            <button class="btn small primary" type="button" id="saveSwitchBtn">Save and continue</button>
+            <button class="btn small" type="button" id="discardBtn">Änderungen verwerfen</button>
+            <button class="btn small primary" type="button" id="saveSwitchBtn">Speichern und weiter</button>
           </span>
         </div>
 
@@ -197,9 +198,9 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
         </div>
 
         <div class="field">
-          <span class="lbl">Photos</span>
+          <span class="lbl">Fotos</span>
           <div class="photos" id="photos"></div>
-          <span class="hint">Up to two photos. Click a frame or drop an image onto it.</span>
+          <span class="hint">Bis zu zwei Fotos. Rahmen anklicken oder ein Bild darauf ziehen.</span>
           <input type="file" id="fileInput" accept="image/*" hidden>
         </div>
 
@@ -235,7 +236,7 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
         </div>
 
         <div class="foot-row">
-          <button class="btn danger" type="button" id="deleteBtn">Delete piece</button>
+          <button class="btn danger" type="button" id="deleteBtn">Stück löschen</button>
           <div class="field price">
             <label for="f-verkaufspreis">Verkaufspreis</label>
             <div class="unit"><input id="f-verkaufspreis" readonly tabindex="-1" placeholder="0,00" aria-describedby="price-hint"><span>€</span></div>
@@ -244,6 +245,10 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
         </div>
 
         <div class="field kommentar"><label for="f-kommentar">Kommentar</label><textarea id="f-kommentar"></textarea></div>
+
+        <div class="save-row">
+          <button class="btn primary save" type="submit" id="saveBtn">Stück speichern</button>
+        </div>
       </form>
     </main>
   </div>

@@ -31,13 +31,13 @@ function parseEuro(v){
 }
 function fmtNum(n){const [i,d]=Math.abs(n).toFixed(2).split(".");return (n<0?"-":"")+i.replace(/\B(?=(\d{3})+(?!\d))/g,".")+","+d;}
 function fmtPrice(v){const n=parseEuro(v);return n===null?(v?String(v):""):"€ "+fmtNum(n);}
-function errMsg(e){return (e&&(e.message||e.error_description))||"unknown error";}
+function errMsg(e){return (e&&(e.message||e.error_description))||"unbekannter Fehler";}
 
 /* ---------- start ---------- */
 const cfg=window.CATALOGUE_CONFIG||{};
 if(!cfg.supabaseUrl||/PASTE/.test(cfg.supabaseUrl)||!cfg.supabaseKey||/PASTE/.test(cfg.supabaseKey)||!window.supabase){
   $("#configView").hidden=false;
-  if(!window.supabase) $("#configView .notice").textContent="The Supabase library didn't load. Check that the vendor folder was uploaded to GitHub.";
+  if(!window.supabase) $("#configView .notice").textContent="Die Supabase-Bibliothek wurde nicht geladen. Prüfen Sie, ob der Ordner „vendor“ auf GitHub hochgeladen wurde.";
   return;
 }
 sb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
@@ -82,7 +82,7 @@ async function showApp(){
 /* ---------- data ---------- */
 async function reload(){
   const {data,error}=await sb.from("pieces").select("*").order("updated_at",{ascending:false});
-  if(error){$("#list").innerHTML=`<div class="empty-state">Your pieces couldn't be loaded (${esc(error.message)}). Reload the page to try again.</div>`;return;}
+  if(error){$("#list").innerHTML=`<div class="empty-state">Die Stücke konnten nicht geladen werden (${esc(error.message)}). Bitte laden Sie die Seite neu.</div>`;return;}
   pieces=data||[];
   await signUrls(pieces.map(p=>p.photos&&p.photos[0]).filter(Boolean));
   renderList();
@@ -129,7 +129,7 @@ function fillForm(p){
 }
 function isDirty(){return current && JSON.stringify(readForm())!==savedSnapshot;}
 function updateHead(){
-  $("#headMeta").textContent=current.isNew?"New piece":"Last saved "+(current.updated_at?new Date(current.updated_at).toLocaleDateString("de-AT"):"");
+  $("#headMeta").textContent=current.isNew?"Neues Stück":"Zuletzt gespeichert am "+(current.updated_at?new Date(current.updated_at).toLocaleDateString("de-AT"):"");
 }
 function recalc(){
   let sum=0, any=false;
@@ -150,13 +150,13 @@ function renderPhotos(){
   for(let i=0;i<2;i++){
     const id=current.photos[i]; const slot=document.createElement("div"); slot.className="slot";
     if(id){
-      slot.innerHTML=`<img data-photo="${esc(id)}" alt="Photo ${i+1}"><button type="button" class="btn small rm">Remove</button>`;
+      slot.innerHTML=`<img data-photo="${esc(id)}" alt="Foto ${i+1}"><button type="button" class="btn small rm">Entfernen</button>`;
       slot.querySelector(".rm").onclick=()=>{current.photos.splice(i,1);renderPhotos();};
     } else if(i===0||current.photos.length>=1){
-      slot.innerHTML=`<button type="button" class="add"><b>+</b>${i===0?"Main photo":"Second photo"}<span class="hint">Click or drop an image</span></button>`;
+      slot.innerHTML=`<button type="button" class="add"><b>+</b>${i===0?"Hauptfoto":"Zweites Foto"}<span class="hint">Anklicken oder Bild hierher ziehen</span></button>`;
       slot.querySelector(".add").onclick=()=>{targetSlot=i;$("#fileInput").click();};
     } else {
-      slot.innerHTML=`<span class="hint">Add the main photo first</span>`;
+      slot.innerHTML=`<span class="hint">Zuerst das Hauptfoto hinzufügen</span>`;
     }
     slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("drag");});
     slot.addEventListener("dragleave",()=>slot.classList.remove("drag"));
@@ -187,18 +187,18 @@ async function uploadPhoto(blob){
   return path;
 }
 async function handleFile(file,slot){
-  if(!/^image\//.test(file.type)){toast("Please choose an image file (JPEG, PNG or WebP).");return;}
+  if(!/^image\//.test(file.type)){toast("Bitte wählen Sie eine Bilddatei (JPEG, PNG oder WebP).");return;}
   const url=URL.createObjectURL(file);
-  toast("Uploading photo…",20000);
+  toast("Foto wird hochgeladen…",20000);
   try{
     const blob=await toJpeg(await drawToCanvas(url,2000));
     const path=await uploadPhoto(blob);
     pendingUploads.add(path);
     if(slot>=current.photos.length) current.photos.push(path); else current.photos[slot]=path;
     current.photos=current.photos.slice(0,2);
-    renderPhotos(); toast("Photo added. Remember to save the piece.");
+    renderPhotos(); toast("Foto hinzugefügt. Bitte das Stück noch speichern.");
   }catch(e){
-    toast(e&&e.message==="decode"?"This image format can't be read here. Try a JPEG or PNG.":"The photo could not be uploaded: "+errMsg(e));
+    toast(e&&e.message==="decode"?"Dieses Bildformat kann nicht gelesen werden. Bitte JPEG oder PNG verwenden.":"Das Foto konnte nicht hochgeladen werden: "+errMsg(e));
   }finally{URL.revokeObjectURL(url);}
 }
 async function removePhotos(paths){
@@ -220,15 +220,15 @@ function renderList(){
   const list=$("#list");
   const hay=p=>TEXT_FIELDS.map(f=>p[f]||"").concat(PRICE_FIELDS.concat(["verkaufspreis"]).map(f=>{const n=parseEuro(p[f]);return n===null?"":fmtNum(n);})).join(" \n ").toLowerCase();
   const shown=pieces.filter(p=>!q||hay(p).includes(q));
-  $("#count").textContent=pieces.length+(pieces.length===1?" piece":" pieces")+(q?" · "+shown.length+" shown":"");
-  if(!pieces.length){list.innerHTML=`<div class="empty-state">No pieces yet. Fill in the form and press <b>Save piece</b>. It will appear here.</div>`;return;}
-  if(!shown.length){list.innerHTML=`<div class="empty-state">Nothing matches “${esc(q)}”.</div>`;return;}
+  $("#count").textContent=pieces.length+(pieces.length===1?" Stück":" Stücke")+(q?" · "+shown.length+" gefunden":"");
+  if(!pieces.length){list.innerHTML=`<div class="empty-state">Noch keine Stücke. Füllen Sie das Formular aus und klicken Sie auf <b>Stück speichern</b>. Es erscheint dann hier.</div>`;return;}
+  if(!shown.length){list.innerHTML=`<div class="empty-state">Keine Treffer für „${esc(q)}“.</div>`;return;}
   list.innerHTML=shown.map(p=>{
     const ph=p.photos&&p.photos[0];
-    const th=ph?`<img class="thumb" data-photo="${esc(ph)}" alt="">`:`<span class="thumb empty">no photo</span>`;
+    const th=ph?`<img class="thumb" data-photo="${esc(ph)}" alt="">`:`<span class="thumb empty">kein Foto</span>`;
     const meta=(p.beschreibung||"").split("\n")[0]||"—";
     return `<button type="button" class="item" data-id="${esc(p.id)}" aria-current="${!!(current&&current.id===p.id)}">${th}
-      <span class="item-main"><span class="item-name">${esc(p.name||"Untitled piece")}</span><span class="item-meta">${esc(meta)}</span></span>
+      <span class="item-main"><span class="item-name">${esc(p.name||"Unbenanntes Stück")}</span><span class="item-meta">${esc(meta)}</span></span>
       <span class="item-price">${esc(fmtPrice(p.verkaufspreis))}</span></button>`;
   }).join("");
   hydrateImgs(list);
@@ -248,12 +248,12 @@ let saving=false;
 async function save(){
   if(saving) return false;
   const f=readForm();
-  if(!f.name){toast("Give the piece a name first.");$("#f-name").focus();return false;}
+  if(!f.name){toast("Bitte geben Sie dem Stück zuerst einen Namen.");$("#f-name").focus();return false;}
   const row={};
   TEXT_FIELDS.forEach(k=>row[k]=f[k]);
   for(const k of PRICE_FIELDS){
     const n=parseEuro(f[k]);
-    if(f[k]&&n===null){toast("The Preis next to "+PRICE_LABELS[k]+" isn't a number.");$("#f-"+k).focus();return false;}
+    if(f[k]&&n===null){toast("Der Preis bei "+PRICE_LABELS[k]+" ist keine Zahl.");$("#f-"+k).focus();return false;}
     row[k]=n;
   }
   row.verkaufspreis=recalc();
@@ -274,23 +274,23 @@ async function save(){
     removePhotos(removed);
     const i=pieces.findIndex(p=>p.id===saved.id); if(i>=0) pieces.splice(i,1);
     pieces.unshift(saved); renderList();
-    toast("Saved");
+    toast("Gespeichert");
     return true;
-  }catch(e){toast("Could not save: "+errMsg(e));return false;}
+  }catch(e){toast("Speichern fehlgeschlagen: "+errMsg(e));return false;}
   finally{saving=false;$("#saveBtn").disabled=false;}
 }
 $("#form").addEventListener("submit",e=>{e.preventDefault();save();});
 let armT=null;
 $("#deleteBtn").onclick=async()=>{
   const b=$("#deleteBtn");
-  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to delete";clearTimeout(armT);armT=setTimeout(()=>{b.classList.remove("armed");b.textContent="Delete piece";},4000);return;}
-  clearTimeout(armT);b.classList.remove("armed");b.textContent="Delete piece";
+  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Zum Löschen nochmals klicken";clearTimeout(armT);armT=setTimeout(()=>{b.classList.remove("armed");b.textContent="Stück löschen";},4000);return;}
+  clearTimeout(armT);b.classList.remove("armed");b.textContent="Stück löschen";
   if(!current.id) return;
   const {error}=await sb.from("pieces").delete().eq("id",current.id);
-  if(error){toast("Could not delete: "+error.message);return;}
+  if(error){toast("Löschen fehlgeschlagen: "+error.message);return;}
   await removePhotos(originalPhotos.concat(current.photos));
   pieces=pieces.filter(p=>p.id!==current.id);
-  toast("Piece deleted"); savedSnapshot=""; current.photos=[]; fillForm(blankPiece());
+  toast("Stück gelöscht"); savedSnapshot=""; current.photos=[]; fillForm(blankPiece());
 };
 
 /* ---------- PDF ---------- */
@@ -311,14 +311,14 @@ async function drawPiece(doc,p){
   const ink=[29,33,33], grey=[105,112,110], rule=[195,200,198], gold=[154,116,40];
   const head=()=>{
     doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(...grey);
-    doc.text((settings.workshop||"Jewellery catalogue").toLowerCase(),M,y);
+    doc.text((settings.workshop||"Schmuckkatalog").toLowerCase(),M,y);
     doc.setDrawColor(...rule);doc.setLineWidth(0.2);doc.line(M,y+2.5,PW-M,y+2.5);
   };
   head();
   const ensure=h=>{if(y+h>BOTTOM){doc.addPage();y=18;head();y+=12;}};
   y+=16;
   doc.setFont("times","normal");doc.setFontSize(26);doc.setTextColor(...ink);
-  const tl=doc.splitTextToSize(p.name||"Untitled piece",CW);doc.text(tl,M,y);y+=(tl.length-1)*10+10;
+  const tl=doc.splitTextToSize(p.name||"Unbenanntes Stück",CW);doc.text(tl,M,y);y+=(tl.length-1)*10+10;
   const imgs=(await Promise.all((p.photos||[]).slice(0,2).map(loadImg))).filter(Boolean);
   if(imgs.length){
     const H=imgs.length===2?92:118, gap=6, bw=imgs.length===2?(CW-gap)/2:CW;
@@ -379,7 +379,7 @@ function footers(doc){
     doc.text(i+" / "+n,PW-M,PH-12,{align:"right"});
   }
 }
-function safeName(s){return String(s).replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,120)||"piece";}
+function safeName(s){return String(s).replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,120)||"Stueck";}
 function formAsPiece(){
   const f=readForm(), p={};
   TEXT_FIELDS.forEach(k=>p[k]=f[k]);
@@ -388,22 +388,22 @@ function formAsPiece(){
   return p;
 }
 $("#pdfBtn").onclick=async()=>{
-  const p=formAsPiece(); toast("Preparing PDF…",20000);
+  const p=formAsPiece(); toast("PDF wird erstellt…",20000);
   try{
     const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
     await drawPiece(doc,p); footers(doc);
-    doc.save(safeName(p.name||"piece")+".pdf"); toast("PDF downloaded");
-  }catch(e){toast("The PDF could not be created: "+errMsg(e));}
+    doc.save(safeName(p.name||"Stueck")+".pdf"); toast("PDF heruntergeladen");
+  }catch(e){toast("Das PDF konnte nicht erstellt werden: "+errMsg(e));}
 };
 $("#exportAll").onclick=async()=>{
-  if(!pieces.length){toast("There are no saved pieces yet.");return;}
-  toast("Preparing catalogue of "+pieces.length+" pieces…",60000);
+  if(!pieces.length){toast("Es gibt noch keine gespeicherten Stücke.");return;}
+  toast("Katalog mit "+pieces.length+" Stücken wird erstellt…",60000);
   try{
     const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
     for(let i=0;i<pieces.length;i++){ if(i>0) doc.addPage(); await drawPiece(doc,pieces[i]); }
     footers(doc);
-    doc.save(safeName((settings.workshop||"Jewellery")+" catalogue")+".pdf"); toast("Catalogue PDF downloaded");
-  }catch(e){toast("The catalogue PDF could not be created: "+errMsg(e));}
+    doc.save(safeName("Katalog "+(settings.workshop||"Schmuck"))+".pdf"); toast("Katalog-PDF heruntergeladen");
+  }catch(e){toast("Das Katalog-PDF konnte nicht erstellt werden: "+errMsg(e));}
 };
 
 /* ---------- backup & import ---------- */
@@ -416,33 +416,33 @@ function downloadFile(blob,name){
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 $("#backupBtn").onclick=async()=>{
-  if(!pieces.length){toast("There is nothing to back up yet.");return;}
+  if(!pieces.length){toast("Es gibt noch nichts zu sichern.");return;}
   try{
     const photos={}; let n=0;
     for(const p of pieces) for(const path of (p.photos||[])){
-      toast("Preparing backup… photo "+(++n),60000);
+      toast("Sicherung wird erstellt… Foto "+(++n),60000);
       try{photos[path]=await blobToDataUrl(await photoBlob(path));}catch(e){}
     }
     const out={app:"goldsmith-catalogue",format:2,exportedAt:new Date().toISOString(),settings:{workshop:settings.workshop},
       pieces:pieces.map(p=>{const o={key:p.id};TEXT_FIELDS.concat(PRICE_FIELDS).forEach(k=>o[k]=p[k]);o.photos=p.photos||[];o.created_at=p.created_at;o.updated_at=p.updated_at;return o;}),photos};
     downloadFile(new Blob([JSON.stringify(out)],{type:"application/json"}),"katalog-backup-"+new Date().toISOString().slice(0,10)+".json");
-    toast("Backup saved to your downloads folder");
-  }catch(e){toast("The backup could not be created: "+errMsg(e));}
+    toast("Sicherung im Download-Ordner gespeichert");
+  }catch(e){toast("Die Sicherung konnte nicht erstellt werden: "+errMsg(e));}
 };
 $("#importBtn").onclick=()=>$("#importInput").click();
 $("#importInput").onchange=async e=>{
   const file=e.target.files[0]; e.target.value=""; if(!file) return;
   let data;
-  try{data=JSON.parse(await file.text());}catch(err){toast("That file isn't a catalogue backup or export.");return;}
-  if(!data||data.app!=="goldsmith-catalogue"||data.format!==2||!Array.isArray(data.pieces)){toast("That file isn't a catalogue backup or export.");return;}
+  try{data=JSON.parse(await file.text());}catch(err){toast("Diese Datei ist keine Katalog-Sicherung und kein Export.");return;}
+  if(!data||data.app!=="goldsmith-catalogue"||data.format!==2||!Array.isArray(data.pieces)){toast("Diese Datei ist keine Katalog-Sicherung und kein Export.");return;}
   const existing=new Set(); pieces.forEach(p=>{existing.add(p.id); if(p.import_key) existing.add(p.import_key);});
   const todo=data.pieces.filter(p=>p&&p.key&&!existing.has(p.key));
   const skipped=data.pieces.length-todo.length;
-  if(!todo.length){toast("All "+data.pieces.length+" pieces in this file are already in the catalogue.");return;}
-  if(!confirm("Import "+todo.length+" pieces from this file?"+(skipped?"\n\n"+skipped+" pieces are already in the catalogue and will be skipped.":""))) return;
+  if(!todo.length){toast(data.pieces.length===1?"Das Stück aus dieser Datei ist bereits im Katalog.":"Alle "+data.pieces.length+" Stücke aus dieser Datei sind bereits im Katalog.");return;}
+  if(!confirm(todo.length+" Stücke aus dieser Datei importieren?"+(skipped?"\n\n"+skipped+" Stücke sind bereits im Katalog und werden übersprungen.":""))) return;
   let done=0, failed=0;
   for(const src of todo){
-    toast("Importing piece "+(done+failed+1)+" of "+todo.length+"…",60000);
+    toast("Importiere Stück "+(done+failed+1)+" von "+todo.length+"…",60000);
     try{
       const row={import_key:String(src.key)}, notes=[];
       TEXT_FIELDS.forEach(k=>row[k]=String(src[k]??"").trim());
@@ -471,15 +471,15 @@ $("#importInput").onchange=async e=>{
     await sb.from("settings").upsert({id:1,workshop:settings.workshop});
   }
   await reload();
-  toast("Imported "+done+" pieces"+(failed?" · "+failed+" failed, try importing the file again":""),6000);
+  toast(done+(done===1?" Stück":" Stücke")+" importiert"+(failed?" · "+failed+" fehlgeschlagen, bitte die Datei nochmals importieren":""),6000);
 };
 
 /* ---------- workshop name ---------- */
-function applyWorkshop(){$("#workshopEyebrow").textContent=settings.workshop||"Goldsmith's workshop";if(document.activeElement!==$("#workshopName"))$("#workshopName").value=settings.workshop||"";}
+function applyWorkshop(){$("#workshopEyebrow").textContent=settings.workshop||"Goldschmiede";if(document.activeElement!==$("#workshopName"))$("#workshopName").value=settings.workshop||"";}
 $("#workshopName").addEventListener("change",async e=>{
   settings.workshop=e.target.value.trim(); applyWorkshop();
   const {error}=await sb.from("settings").upsert({id:1,workshop:settings.workshop});
-  toast(error?"Could not save the workshop name: "+error.message:"Workshop name saved");
+  toast(error?"Werkstattname konnte nicht gespeichert werden: "+error.message:"Werkstattname gespeichert");
 });
 
 window.addEventListener("beforeunload",e=>{if(isDirty()){e.preventDefault();e.returnValue="";}});
