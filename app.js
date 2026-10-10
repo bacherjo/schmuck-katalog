@@ -136,7 +136,7 @@ function readForm(){
 }
 function fillForm(p){
   cleanupPending(p.photos||[]);
-  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,2),updated_at:p.updated_at,nummer:p.nummer??null};
+  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,2),updated_at:p.updated_at,nummer:p.nummer??null,share_token:p.share_token||null};
   originalPhotos=current.photos.slice();
   TEXT_FIELDS.forEach(f=>$("#f-"+f).value=p[f]??"");
   PRICE_FIELDS.forEach(f=>{const n=parseEuro(p[f]);$("#f-"+f).value=n===null?"":fmtNum(n);});
@@ -149,6 +149,7 @@ function fillForm(p){
 function isDirty(){return current && JSON.stringify(readForm())!==savedSnapshot;}
 function updateHead(){
   $("#headNr").textContent=current.nummer!=null?"Nr. "+current.nummer:"Neues Stück";
+  $("#shareState").hidden=!current.share_token;
   $("#headMeta").textContent=current.isNew?"Die Nummer wird beim Speichern vergeben":"Zuletzt gespeichert am "+(current.updated_at?new Date(current.updated_at).toLocaleDateString("de-AT"):"");
 }
 function recalc(){
@@ -288,7 +289,7 @@ async function save(){
     const saved=res.data;
     const removed=originalPhotos.filter(id=>!saved.photos.includes(id));
     saved.photos.forEach(p=>pendingUploads.delete(p));
-    current.id=saved.id; current.isNew=false; current.updated_at=saved.updated_at; current.nummer=saved.nummer??null; originalPhotos=saved.photos.slice();
+    current.id=saved.id; current.isNew=false; current.updated_at=saved.updated_at; current.nummer=saved.nummer??null; current.share_token=saved.share_token||null; originalPhotos=saved.photos.slice();
     savedSnapshot=JSON.stringify(readForm());
     $("#dirtyBanner").hidden=true; $("#deleteBtn").hidden=false; updateHead();
     removePhotos(removed);
@@ -421,6 +422,43 @@ async function pdfPiece(firstPageOnly){
 }
 $("#pdfBtn").onclick=()=>pdfPiece(false);
 $("#pdf1Btn").onclick=()=>pdfPiece(true);
+
+/* ---------- share by e-mail ---------- */
+// Each piece can get a secret link to stueck.html, which shows only name, number, photos and Beschreibung.
+function shareLink(token){return location.origin+location.pathname.replace(/[^/]*$/,"")+"stueck.html?t="+token;}
+function setShareToken(token){
+  current.share_token=token;
+  const p=pieces.find(x=>x.id===current.id); if(p) p.share_token=token;
+  updateHead();
+}
+$("#mailBtn").onclick=async()=>{
+  if(current.isNew||!current.id){toast("Bitte das Stück zuerst speichern.");return;}
+  if(isDirty()){toast("Bitte zuerst die Änderungen speichern.");return;}
+  let token=current.share_token;
+  if(!token){
+    const {data,error}=await sb.from("pieces").update({share_token:uuid()}).eq("id",current.id).select("share_token").single();
+    if(error){toast("Der Link konnte nicht erstellt werden: "+error.message);return;}
+    token=data.share_token; setShareToken(token);
+  }
+  const link=shareLink(token);
+  const name=$("#f-name").value.trim();
+  const subject=name+" – "+BRAND;
+  const body="Hallo,\n\nhier finden Sie das Schmuckstück „"+name+"“"+(current.nummer!=null?" (Nr. "+current.nummer+")":"")+":\n"+link+"\n\nHerzliche Grüße\n"+BRAND;
+  let copied=false;
+  try{await navigator.clipboard.writeText(link);copied=true;}catch(e){}
+  location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  toast("Ihr E-Mail-Programm wird geöffnet."+(copied?" Der Link ist auch in der Zwischenablage.":""),6000);
+};
+let unshareArmed=null;
+$("#unshareBtn").onclick=async()=>{
+  const b=$("#unshareBtn");
+  if(!unshareArmed){b.textContent="Wirklich aufheben? Nochmals klicken";unshareArmed=setTimeout(()=>{b.textContent="Freigabe aufheben";unshareArmed=null;},4000);return;}
+  clearTimeout(unshareArmed);unshareArmed=null;b.textContent="Freigabe aufheben";
+  const {error}=await sb.from("pieces").update({share_token:null}).eq("id",current.id);
+  if(error){toast("Die Freigabe konnte nicht aufgehoben werden: "+error.message);return;}
+  setShareToken(null);
+  toast("Freigabe aufgehoben. Bereits verschickte Links funktionieren nicht mehr.",5000);
+};
 $("#exportAll").onclick=async()=>{
   if(!pieces.length){toast("Es gibt noch keine gespeicherten Stücke.");return;}
   toast("Katalog mit "+pieces.length+" Stücken wird erstellt…",60000);

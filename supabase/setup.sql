@@ -69,3 +69,31 @@ create policy "signed-in users change photos" on storage.objects
 drop policy if exists "signed-in users delete photos" on storage.objects;
 create policy "signed-in users delete photos" on storage.objects
   for delete to authenticated using (bucket_id = 'photos');
+
+-- 5. Share links ("Stück per E-Mail senden") ----------------------------------
+-- Each piece can get a secret token. stueck.html?t=<token> shows only
+-- number, name, Beschreibung and photos. Costs and Kommentar are never shown.
+alter table public.pieces add column if not exists share_token uuid unique;
+
+create or replace function public.public_piece(token uuid)
+returns json language sql stable security definer set search_path = public as $$
+  select json_build_object('nummer', nummer, 'name', name, 'beschreibung', beschreibung, 'photos', photos)
+  from public.pieces where token is not null and share_token = token;
+$$;
+revoke all on function public.public_piece(uuid) from public;
+grant execute on function public.public_piece(uuid) to anon, authenticated;
+
+create schema if not exists private;
+revoke all on schema private from public;
+grant usage on schema private to anon, authenticated;
+
+create or replace function private.is_shared_photo(path text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.pieces where share_token is not null and path = any(photos));
+$$;
+revoke all on function private.is_shared_photo(text) from public;
+grant execute on function private.is_shared_photo(text) to anon, authenticated;
+
+drop policy if exists "visitors read photos of shared pieces" on storage.objects;
+create policy "visitors read photos of shared pieces" on storage.objects
+  for select to anon using (bucket_id = 'photos' and private.is_shared_photo(name));

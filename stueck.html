@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>fanijansen fine jewellery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Public view of one piece: the same content as PDF page 1 (brand, number, name, photos, Beschreibung). */
+:root{
+  --bg:#f6f7f6; --surface:#ffffff; --line:#d8dcda; --fg:#1d2121; --muted:#5f6866; --metal:#9a7428;
+  --f-display:"Bodoni Moda", "Didot", Georgia, serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#141517; --surface:#1d1f22; --line:#363a3f; --fg:#eceef0; --muted:#9aa2a8; --metal:#d6b46b; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:28px 64px}
+img{max-width:100%}
+.sheet{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.brand{font-weight:600;font-size:14px;color:var(--muted)}
+.nr{font-family:var(--f-mono);font-size:13px;color:var(--metal);font-variant-numeric:tabular-nums}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);line-height:1.1;margin:8px 0 0;text-wrap:balance}
+.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.photos.one{grid-template-columns:minmax(0,1fr)}
+@media (max-width:560px){.photos{grid-template-columns:minmax(0,1fr)}}
+.photos figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
+.photos img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.desc{font-family:var(--f-display);font-size:18px;line-height:1.6;max-width:65ch;white-space:pre-line;margin:6px 0 0}
+.msg{max-width:520px;margin:12vh auto 0;text-align:center;color:var(--muted)}
+.msg .brand{display:block;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="msg" id="loading"><span class="brand">fanijansen fine jewellery</span>Wird geladen…</div>
+<div class="msg" id="missing" hidden><span class="brand">fanijansen fine jewellery</span>Dieses Schmuckstück ist nicht verfügbar. Der Link ist ungültig oder wurde deaktiviert.</div>
+
+<article class="sheet" id="sheet" hidden>
+  <div class="top"><span class="brand">fanijansen fine jewellery</span><span class="nr" id="nr"></span></div>
+  <h1 id="name"></h1>
+  <div class="photos" id="photos"></div>
+  <section id="descWrap" hidden>
+    <div class="label">Beschreibung</div>
+    <p class="desc" id="desc"></p>
+  </section>
+</article>
+
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script>
+(async function(){
+  const $=s=>document.querySelector(s);
+  const show=id=>{["loading","missing","sheet"].forEach(x=>$("#"+x).hidden=(x!==id));};
+  const token=new URLSearchParams(location.search).get("t")||"";
+  const cfg=window.CATALOGUE_CONFIG||{};
+  if(!/^[0-9a-f-]{36}$/i.test(token)||!window.supabase||!cfg.supabaseUrl){show("missing");return;}
+  // Visitors are never signed in here: don't read or store any login.
+  const sb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const {data,error}=await sb.rpc("public_piece",{token});
+  if(error||!data){show("missing");return;}
+  const p=data;
+  document.title=(p.name||"Schmuckstück")+" – fanijansen fine jewellery";
+  $("#nr").textContent=p.nummer!=null?"Nr. "+p.nummer:"";
+  $("#name").textContent=p.name||"Schmuckstück";
+  if(p.beschreibung){$("#desc").textContent=p.beschreibung;$("#descWrap").hidden=false;}
+  const paths=(p.photos||[]).slice(0,2);
+  if(paths.length){
+    const {data:urls}=await sb.storage.from("photos").createSignedUrls(paths,3600);
+    const box=$("#photos"); if(paths.length===1) box.classList.add("one");
+    (urls||[]).forEach((u,i)=>{
+      if(!u.signedUrl) return;
+      const f=document.createElement("figure"); const img=document.createElement("img");
+      img.src=u.signedUrl; img.alt=(p.name||"Schmuckstück")+" – Foto "+(i+1);
+      f.appendChild(img); box.appendChild(f);
+    });
+  }
+  show("sheet");
+})();
+</script>
+</body>
+</html>
