@@ -329,7 +329,8 @@ async function loadImg(path){
   }catch(e){return null;}
 }
 const PW=210, PH=297, M=18, CW=PW-2*M, BOTTOM=PH-22;
-async function drawPiece(doc,p){
+async function drawPiece(doc,p,opts){
+  const firstOnly=!!(opts&&opts.firstPageOnly);
   let y=18;
   const ink=[29,33,33], grey=[105,112,110], rule=[195,200,198], gold=[154,116,40];
   const head=()=>{
@@ -366,6 +367,7 @@ async function drawPiece(doc,p){
   const has=v=>v!==null&&v!==undefined&&String(v).trim()!=="";
   const rows=GROUPS.filter(g=>has(p[g[1]])||(g[2]&&has(p[g[2]])));
   const price=has(p.verkaufspreis)?p.verkaufspreis:null;
+  if(firstOnly) return;   // "PDF Seite 1": stop before the separator line and page 2
   ensure(10);
   doc.setDrawColor(...rule);doc.setLineWidth(0.3);doc.line(M,y,PW-M,y);
   if(rows.length||price!==null||p.kommentar){doc.addPage();y=18;head();y+=16;}
@@ -411,14 +413,17 @@ function formAsPiece(){
   p.verkaufspreis=recalc(); p.photos=f.photos; p.nummer=current.nummer;
   return p;
 }
-$("#pdfBtn").onclick=async()=>{
+async function pdfPiece(firstPageOnly){
   const p=formAsPiece(); toast("PDF wird erstellt…",20000);
   try{
     const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
-    await drawPiece(doc,p); footers(doc);
-    doc.save(safeName([p.nummer,p.name].filter(v=>v!=null&&v!=="").join(" ")||"Stueck")+".pdf"); toast("PDF heruntergeladen");
+    await drawPiece(doc,p,{firstPageOnly}); footers(doc);
+    const base=[p.nummer,p.name].filter(v=>v!=null&&v!=="").join(" ")||"Stueck";
+    doc.save(safeName(base+(firstPageOnly?" Seite 1":""))+".pdf"); toast("PDF heruntergeladen");
   }catch(e){toast("Das PDF konnte nicht erstellt werden: "+errMsg(e));}
-};
+}
+$("#pdfBtn").onclick=()=>pdfPiece(false);
+$("#pdf1Btn").onclick=()=>pdfPiece(true);
 $("#exportAll").onclick=async()=>{
   if(!pieces.length){toast("Es gibt noch keine gespeicherten Stücke.");return;}
   toast("Katalog mit "+pieces.length+" Stücken wird erstellt…",60000);
