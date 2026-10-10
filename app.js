@@ -139,7 +139,7 @@ function readForm(){
 }
 function fillForm(p){
   cleanupPending(p.photos||[]);
-  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,2),updated_at:p.updated_at};
+  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,2),updated_at:p.updated_at,nummer:p.nummer??null};
   originalPhotos=current.photos.slice();
   TEXT_FIELDS.forEach(f=>$("#f-"+f).value=p[f]??"");
   PRICE_FIELDS.forEach(f=>{const n=parseEuro(p[f]);$("#f-"+f).value=n===null?"":fmtNum(n);});
@@ -151,7 +151,8 @@ function fillForm(p){
 }
 function isDirty(){return current && JSON.stringify(readForm())!==savedSnapshot;}
 function updateHead(){
-  $("#headMeta").textContent=current.isNew?"Neues Stück":"Zuletzt gespeichert am "+(current.updated_at?new Date(current.updated_at).toLocaleDateString("de-AT"):"");
+  $("#headNr").textContent=current.nummer!=null?"Nr. "+current.nummer:"Neues Stück";
+  $("#headMeta").textContent=current.isNew?"Die Nummer wird beim Speichern vergeben":"Zuletzt gespeichert am "+(current.updated_at?new Date(current.updated_at).toLocaleDateString("de-AT"):"");
 }
 function recalc(){
   let sum=0, any=false;
@@ -240,7 +241,7 @@ async function cleanupPending(keep){
 function renderList(){
   const q=$("#search").value.trim().toLowerCase();
   const list=$("#list");
-  const hay=p=>TEXT_FIELDS.map(f=>p[f]||"").concat(PRICE_FIELDS.concat(["verkaufspreis"]).map(f=>{const n=parseEuro(p[f]);return n===null?"":fmtNum(n);})).join(" \n ").toLowerCase();
+  const hay=p=>[p.nummer!=null?String(p.nummer):""].concat(TEXT_FIELDS.map(f=>p[f]||"")).concat(PRICE_FIELDS.concat(["verkaufspreis"]).map(f=>{const n=parseEuro(p[f]);return n===null?"":fmtNum(n);})).join(" \n ").toLowerCase();
   const shown=pieces.filter(p=>!q||hay(p).includes(q));
   $("#count").textContent=pieces.length+(pieces.length===1?" Stück":" Stücke")+(q?" · "+shown.length+" gefunden":"");
   if(!pieces.length){list.innerHTML=`<div class="empty-state">Noch keine Stücke. Füllen Sie das Formular aus und klicken Sie auf <b>Stück speichern</b>. Es erscheint dann hier.</div>`;return;}
@@ -250,7 +251,7 @@ function renderList(){
     const th=ph?`<img class="thumb" data-photo="${esc(ph)}" alt="">`:`<span class="thumb empty">kein Foto</span>`;
     const meta=(p.beschreibung||"").split("\n")[0]||"—";
     return `<button type="button" class="item" data-id="${esc(p.id)}" aria-current="${!!(current&&current.id===p.id)}">${th}
-      <span class="item-main"><span class="item-name">${esc(p.name||"Unbenanntes Stück")}</span><span class="item-meta">${esc(meta)}</span></span>
+      <span class="item-main"><span class="item-nr">${p.nummer!=null?"Nr. "+esc(p.nummer):""}</span><span class="item-name">${esc(p.name||"Unbenanntes Stück")}</span><span class="item-meta">${esc(meta)}</span></span>
       <span class="item-price">${esc(fmtPrice(p.verkaufspreis))}</span></button>`;
   }).join("");
   hydrateImgs(list);
@@ -290,7 +291,7 @@ async function save(){
     const saved=res.data;
     const removed=originalPhotos.filter(id=>!saved.photos.includes(id));
     saved.photos.forEach(p=>pendingUploads.delete(p));
-    current.id=saved.id; current.isNew=false; current.updated_at=saved.updated_at; originalPhotos=saved.photos.slice();
+    current.id=saved.id; current.isNew=false; current.updated_at=saved.updated_at; current.nummer=saved.nummer??null; originalPhotos=saved.photos.slice();
     savedSnapshot=JSON.stringify(readForm());
     $("#dirtyBanner").hidden=true; $("#deleteBtn").hidden=false; updateHead();
     removePhotos(removed);
@@ -334,6 +335,7 @@ async function drawPiece(doc,p){
   const head=()=>{
     doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(...grey);
     doc.text((settings.workshop||"Schmuckkatalog").toLowerCase(),M,y);
+    if(p.nummer!=null){doc.setFont("helvetica","normal");doc.text("Nr. "+p.nummer,PW-M,y,{align:"right"});}
     doc.setDrawColor(...rule);doc.setLineWidth(0.2);doc.line(M,y+2.5,PW-M,y+2.5);
   };
   head();
@@ -406,7 +408,7 @@ function formAsPiece(){
   const f=readForm(), p={};
   TEXT_FIELDS.forEach(k=>p[k]=f[k]);
   PRICE_FIELDS.forEach(k=>p[k]=f[k]);
-  p.verkaufspreis=recalc(); p.photos=f.photos;
+  p.verkaufspreis=recalc(); p.photos=f.photos; p.nummer=current.nummer;
   return p;
 }
 $("#pdfBtn").onclick=async()=>{
@@ -414,7 +416,7 @@ $("#pdfBtn").onclick=async()=>{
   try{
     const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
     await drawPiece(doc,p); footers(doc);
-    doc.save(safeName(p.name||"Stueck")+".pdf"); toast("PDF heruntergeladen");
+    doc.save(safeName([p.nummer,p.name].filter(v=>v!=null&&v!=="").join(" ")||"Stueck")+".pdf"); toast("PDF heruntergeladen");
   }catch(e){toast("Das PDF konnte nicht erstellt werden: "+errMsg(e));}
 };
 $("#exportAll").onclick=async()=>{
@@ -446,7 +448,7 @@ $("#backupBtn").onclick=async()=>{
       try{photos[path]=await blobToDataUrl(await photoBlob(path));}catch(e){}
     }
     const out={app:"goldsmith-catalogue",format:2,exportedAt:new Date().toISOString(),settings:{workshop:settings.workshop},
-      pieces:pieces.map(p=>{const o={key:p.id};TEXT_FIELDS.concat(PRICE_FIELDS).forEach(k=>o[k]=p[k]);o.photos=p.photos||[];o.created_at=p.created_at;o.updated_at=p.updated_at;return o;}),photos};
+      pieces:pieces.map(p=>{const o={key:p.id,nummer:p.nummer};TEXT_FIELDS.concat(PRICE_FIELDS).forEach(k=>o[k]=p[k]);o.photos=p.photos||[];o.created_at=p.created_at;o.updated_at=p.updated_at;return o;}),photos};
     downloadFile(new Blob([JSON.stringify(out)],{type:"application/json"}),"katalog-backup-"+new Date().toISOString().slice(0,10)+".json");
     toast("Sicherung im Download-Ordner gespeichert");
   }catch(e){toast("Die Sicherung konnte nicht erstellt werden: "+errMsg(e));}

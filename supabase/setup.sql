@@ -26,6 +26,10 @@ create table if not exists public.pieces (
   updated_at        timestamptz not null default now()
 );
 
+-- 1b. Automatic piece number (1000, 1001, ...), assigned by the database
+alter table public.pieces
+  add column if not exists nummer integer generated always as identity (start with 1000) unique;
+
 -- 2. Table for settings (workshop name on the PDFs) --------------------------
 create table if not exists public.settings (
   id       int primary key default 1 check (id = 1),
