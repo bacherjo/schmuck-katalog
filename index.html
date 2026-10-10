@@ -33,8 +33,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.05;margin:0;text-wrap:balance}
 .top-right{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
-.workshop{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-.workshop input{width:200px;max-width:55vw}
+.brand-name{font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.01em}
 .who{font-size:12.5px;color:var(--muted)}
 .app{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:840px){.app{grid-template-columns:minmax(0,1fr)}}
@@ -135,7 +134,7 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 <!-- Login -->
 <div class="login" id="loginView" hidden>
   <div class="brand">
-    <span class="eyebrow">Goldschmiede</span>
+    <span class="brand-name">fanijansen fine jewellery</span>
     <h1>Schmuckkatalog</h1>
   </div>
   <form id="loginForm">
@@ -155,14 +154,10 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 <div class="wrap" id="appView" hidden>
   <header class="top">
     <div class="brand">
-      <span class="eyebrow" id="workshopEyebrow">Goldschmiede</span>
+      <span class="brand-name">fanijansen fine jewellery</span>
       <h1>Schmuckkatalog</h1>
     </div>
     <div class="top-right">
-      <div class="workshop">
-        <label for="workshopName">Werkstattname auf PDFs</label>
-        <input id="workshopName" placeholder="z. B. Atelier Bacher">
-      </div>
       <span class="who" id="who"></span>
       <button class="btn small" type="button" id="logoutBtn">Abmelden</button>
     </div>

@@ -10,7 +10,8 @@ const BUCKET = "photos";
 
 /* ---------- state ---------- */
 let sb=null, user=null;
-let pieces=[], settings={workshop:""};
+let pieces=[];
+const BRAND="fanijansen fine jewellery";   // shown above the title and in every PDF header
 let current=null, savedSnapshot="", pendingSwitch=null, originalPhotos=[];
 let pendingUploads=new Set();   // photos uploaded but not yet saved with a piece
 const urlCache=new Map();       // storage path -> {url, exp}
@@ -98,7 +99,7 @@ async function showApp(){
   $("#loginView").hidden=true; $("#appView").hidden=false;
   $("#who").textContent=user.email||"";
   fillForm(blankPiece());
-  await Promise.all([loadSettings(),reload()]);
+  await reload();
 }
 
 /* ---------- data ---------- */
@@ -108,10 +109,6 @@ async function reload(){
   pieces=data||[];
   await signUrls(pieces.map(p=>p.photos&&p.photos[0]).filter(Boolean));
   renderList();
-}
-async function loadSettings(){
-  const {data}=await sb.from("settings").select("workshop").eq("id",1).maybeSingle();
-  settings.workshop=(data&&data.workshop)||""; applyWorkshop();
 }
 async function signUrls(paths){
   const now=Date.now();
@@ -335,7 +332,7 @@ async function drawPiece(doc,p,opts){
   const ink=[29,33,33], grey=[105,112,110], rule=[195,200,198], gold=[154,116,40];
   const head=()=>{
     doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(...grey);
-    doc.text((settings.workshop||"Schmuckkatalog").toLowerCase(),M,y);
+    doc.text(BRAND,M,y);
     if(p.nummer!=null){doc.setFont("helvetica","normal");doc.text("Nr. "+p.nummer,PW-M,y,{align:"right"});}
     doc.setDrawColor(...rule);doc.setLineWidth(0.2);doc.line(M,y+2.5,PW-M,y+2.5);
   };
@@ -431,7 +428,7 @@ $("#exportAll").onclick=async()=>{
     const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
     for(let i=0;i<pieces.length;i++){ if(i>0) doc.addPage(); await drawPiece(doc,pieces[i]); }
     footers(doc);
-    doc.save(safeName("Katalog "+(settings.workshop||"Schmuck"))+".pdf"); toast("Katalog-PDF heruntergeladen");
+    doc.save(safeName("Katalog fanijansen")+".pdf"); toast("Katalog-PDF heruntergeladen");
   }catch(e){toast("Das Katalog-PDF konnte nicht erstellt werden: "+errMsg(e));}
 };
 
@@ -452,7 +449,7 @@ $("#backupBtn").onclick=async()=>{
       toast("Sicherung wird erstellt… Foto "+(++n),60000);
       try{photos[path]=await blobToDataUrl(await photoBlob(path));}catch(e){}
     }
-    const out={app:"goldsmith-catalogue",format:2,exportedAt:new Date().toISOString(),settings:{workshop:settings.workshop},
+    const out={app:"goldsmith-catalogue",format:2,exportedAt:new Date().toISOString(),settings:{},
       pieces:pieces.map(p=>{const o={key:p.id,nummer:p.nummer};TEXT_FIELDS.concat(PRICE_FIELDS).forEach(k=>o[k]=p[k]);o.photos=p.photos||[];o.created_at=p.created_at;o.updated_at=p.updated_at;return o;}),photos};
     downloadFile(new Blob([JSON.stringify(out)],{type:"application/json"}),"katalog-backup-"+new Date().toISOString().slice(0,10)+".json");
     toast("Sicherung im Download-Ordner gespeichert");
@@ -495,21 +492,10 @@ $("#importInput").onchange=async e=>{
       done++;
     }catch(err){failed++;console.error(err);}
   }
-  if(data.settings&&data.settings.workshop&&!settings.workshop){
-    settings.workshop=data.settings.workshop; applyWorkshop();
-    await sb.from("settings").upsert({id:1,workshop:settings.workshop});
-  }
   await reload();
   toast(done+(done===1?" Stück":" Stücke")+" importiert"+(failed?" · "+failed+" fehlgeschlagen, bitte die Datei nochmals importieren":""),6000);
 };
 
-/* ---------- workshop name ---------- */
-function applyWorkshop(){$("#workshopEyebrow").textContent=settings.workshop||"Goldschmiede";if(document.activeElement!==$("#workshopName"))$("#workshopName").value=settings.workshop||"";}
-$("#workshopName").addEventListener("change",async e=>{
-  settings.workshop=e.target.value.trim(); applyWorkshop();
-  const {error}=await sb.from("settings").upsert({id:1,workshop:settings.workshop});
-  toast(error?"Werkstattname konnte nicht gespeichert werden: "+error.message:"Werkstattname gespeichert");
-});
 
 window.addEventListener("beforeunload",e=>{if(isDirty()){e.preventDefault();e.returnValue="";}});
 })();
