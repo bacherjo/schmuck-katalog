@@ -30,7 +30,6 @@ img{max-width:100%}
 h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);line-height:1.1;margin:8px 0 0;text-wrap:balance}
 .photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .photos.one{grid-template-columns:minmax(0,1fr)}
-@media (max-width:560px){.photos{grid-template-columns:minmax(0,1fr)}}
 .photos figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
 .photos img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
 .label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -71,7 +70,7 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);l
   $("#nr").textContent=p.nummer!=null?"Nr. "+p.nummer:"";
   $("#name").textContent=p.name||"Schmuckstück";
   if(p.beschreibung){$("#desc").textContent=p.beschreibung;$("#descWrap").hidden=false;}
-  const paths=(p.photos||[]).slice(0,2);
+  const paths=(p.photos||[]).slice(0,4);
   if(paths.length){
     const {data:urls}=await sb.storage.from("photos").createSignedUrls(paths,3600);
     const box=$("#photos"); if(paths.length===1) box.classList.add("one");

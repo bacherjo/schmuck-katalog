@@ -7,6 +7,7 @@ const TEXT_FIELDS  = ["name","beschreibung","steine","gold","fasser","druck","wi
 const PRICE_FIELDS = ["steine_preis","gold_preis","fasser_preis","druck_preis","willi_preis","arbeitszeit_preis"];
 const PRICE_LABELS = {steine_preis:"Steine",gold_preis:"Gold",fasser_preis:"Fasser",druck_preis:"3D Druck",willi_preis:"Extern",arbeitszeit_preis:"Arbeitszeit"};
 const BUCKET = "photos";
+const MAX_PHOTOS = 4;   // shown as a 2×2 gallery
 
 /* ---------- state ---------- */
 let sb=null, user=null;
@@ -136,7 +137,7 @@ function readForm(){
 }
 function fillForm(p){
   cleanupPending(p.photos||[]);
-  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,2),updated_at:p.updated_at,nummer:p.nummer??null,share_token:p.share_token||null};
+  current={id:p.id,isNew:!!p.isNew,photos:(p.photos||[]).slice(0,MAX_PHOTOS),updated_at:p.updated_at,nummer:p.nummer??null,share_token:p.share_token||null};
   originalPhotos=current.photos.slice();
   TEXT_FIELDS.forEach(f=>$("#f-"+f).value=p[f]??"");
   PRICE_FIELDS.forEach(f=>{const n=parseEuro(p[f]);$("#f-"+f).value=n===null?"":fmtNum(n);});
@@ -168,16 +169,16 @@ $("#form").addEventListener("input",e=>{if(/_preis$/.test(e.target.id))recalc();
 let targetSlot=0;
 function renderPhotos(){
   const box=$("#photos"); box.innerHTML="";
-  for(let i=0;i<2;i++){
+  for(let i=0;i<MAX_PHOTOS;i++){
     const id=current.photos[i]; const slot=document.createElement("div"); slot.className="slot";
     if(id){
-      slot.innerHTML=`<img data-photo="${esc(id)}" alt="Foto ${i+1}"><button type="button" class="btn small rm">Entfernen</button>`;
+      slot.innerHTML=`<img data-photo="${esc(id)}" alt="Foto ${i+1}">${i===0?'<span class="badge">Hauptfoto</span>':""}<button type="button" class="btn small rm">Entfernen</button>`;
       slot.querySelector(".rm").onclick=()=>{current.photos.splice(i,1);renderPhotos();};
-    } else if(i===0||current.photos.length>=1){
-      slot.innerHTML=`<button type="button" class="add"><b>+</b>${i===0?"Hauptfoto":"Zweites Foto"}<span class="hint">Anklicken oder Bild hierher ziehen</span></button>`;
-      slot.querySelector(".add").onclick=()=>{targetSlot=i;$("#fileInput").click();};
     } else {
-      slot.innerHTML=`<span class="hint">Zuerst das Hauptfoto hinzufügen</span>`;
+      // empty frames fill up from the front, so the photos stay in order
+      const label=current.photos.length===0&&i===0?"Hauptfoto":"Foto hinzufügen";
+      slot.innerHTML=`<button type="button" class="add"><b>+</b>${label}<span class="hint">Anklicken oder Bild hierher ziehen</span></button>`;
+      slot.querySelector(".add").onclick=()=>{targetSlot=i;$("#fileInput").click();};
     }
     slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("drag");});
     slot.addEventListener("dragleave",()=>slot.classList.remove("drag"));
@@ -216,7 +217,7 @@ async function handleFile(file,slot){
     const path=await uploadPhoto(blob);
     pendingUploads.add(path);
     if(slot>=current.photos.length) current.photos.push(path); else current.photos[slot]=path;
-    current.photos=current.photos.slice(0,2);
+    current.photos=current.photos.slice(0,MAX_PHOTOS);
     renderPhotos(); toast("Foto hinzugefügt. Bitte das Stück noch speichern.");
   }catch(e){
     toast(e&&e.message==="decode"?"Dieses Bildformat kann nicht gelesen werden. Bitte JPEG oder PNG verwenden.":"Das Foto konnte nicht hochgeladen werden: "+errMsg(e));
@@ -342,14 +343,19 @@ async function drawPiece(doc,p,opts){
   y+=16;
   doc.setFont("times","normal");doc.setFontSize(26);doc.setTextColor(...ink);
   const tl=doc.splitTextToSize(p.name||"Unbenanntes Stück",CW);doc.text(tl,M,y);y+=(tl.length-1)*10+10;
-  const imgs=(await Promise.all((p.photos||[]).slice(0,2).map(loadImg))).filter(Boolean);
+  const imgs=(await Promise.all((p.photos||[]).slice(0,MAX_PHOTOS).map(loadImg))).filter(Boolean);
   if(imgs.length){
-    const H=imgs.length===2?92:118, gap=6, bw=imgs.length===2?(CW-gap)/2:CW;
+    // one photo: large; two or more: 2×2 gallery (cells 4:3)
+    const gap=6, single=imgs.length===1;
+    const bw=single?CW:(CW-gap)/2, H=single?118:Math.round(bw*0.75);
+    const rows=single?1:Math.ceil(imgs.length/2);
     imgs.forEach((im,i)=>{
-      const sc=Math.min(bw/im.w,H/im.h), w=im.w*sc, h=im.h*sc, bx=M+i*(bw+gap);
-      doc.addImage(im.data,"JPEG",bx+(bw-w)/2,y+(H-h)/2,w,h);
+      const col=single?0:i%2, row=single?0:Math.floor(i/2);
+      const sc=Math.min(bw/im.w,H/im.h), w=im.w*sc, h=im.h*sc;
+      const bx=M+col*(bw+gap), by=y+row*(H+gap);
+      doc.addImage(im.data,"JPEG",bx+(bw-w)/2,by+(H-h)/2,w,h);
     });
-    y+=H+10;
+    y+=rows*H+(rows-1)*gap+10;
   }
   const paragraphs=(title,text)=>{
     doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...grey);doc.text(title,M,y,{charSpace:0.6});y+=6;
@@ -519,7 +525,7 @@ $("#importInput").onchange=async e=>{
       const vals=PRICE_FIELDS.map(k=>row[k]).filter(v=>v!==null);
       row.verkaufspreis=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)*100)/100:null;
       row.photos=[];
-      for(const k of (src.photos||[]).slice(0,2)){
+      for(const k of (src.photos||[]).slice(0,MAX_PHOTOS)){
         const u=data.photos&&data.photos[k]; if(!u) continue;
         row.photos.push(await uploadPhoto(await dataUrlToBlob(u)));
       }

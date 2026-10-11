@@ -16,7 +16,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 
 ### The form (one entry per piece)
 - **Nr.**: an automatic 4-digit number, starting at **1000**. Assigned by the database when a piece is first saved. It can't be changed, and numbers of deleted pieces are not reused.
-- **Name**, **Fotos** (up to two; large photos are reduced to 2000 px), **Beschreibung**
+- **Name**, **Fotos** (up to four, shown as a 2×2 gallery; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px), **Beschreibung**
 - *Separator line*
 - **Steine** (hint: Preis, Karat, Größe, wann bei wem gekauft) + **Preis** (€)
 - **Gold** (hint: Datum und Preis) + **Preis** (€)
@@ -34,7 +34,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 
 ### PDFs
 - **PDF herunterladen**: two pages.
-  - Page 1: name, photos, Beschreibung, separator line
+  - Page 1: name, photos (one photo large, two to four as a 2×2 gallery), Beschreibung, separator line
   - Page 2: Steine, Gold, Fasser, 3D Druck, Extern, Arbeitszeit (each with its Preis on the same line), Verkaufspreis bottom right, Kommentar
 - **PDF Seite 1**: page 1 only (for customers).
 - **Ganzen Katalog herunterladen (PDF)**: all pieces in one file.
@@ -42,7 +42,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 
 ### Stück per E-Mail senden
 - Creates a **secret link** for the piece and opens your e-mail program with a prepared message (the link is also copied, so it can be pasted into WhatsApp etc.).
-- The link opens `stueck.html`, a public page **without login** that shows only: brand, number, name, photos, Beschreibung. Costs, prices, Steine and Kommentar are never sent to the recipient (the database only hands out these four fields).
+- The link opens `stueck.html`, a public page **without login** that shows only: brand, number, name, photos (2×2 gallery), Beschreibung. Costs, prices, Steine and Kommentar are never sent to the recipient (the database only hands out these four fields).
 - While a piece is shared, **"Per Link freigegeben · Freigabe aufheben"** appears under its number. Clicking it twice switches the link off; old links then show "nicht verfügbar". Sending again creates a new link.
 - The piece must be saved first.
 
