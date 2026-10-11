@@ -33,6 +33,10 @@ alter table public.pieces
 -- 1c. Preis next to Steine (added later)
 alter table public.pieces add column if not exists steine_preis numeric(12,2);
 
+-- 1d. Silber + Preis (added later)
+alter table public.pieces add column if not exists silber text not null default '';
+alter table public.pieces add column if not exists silber_preis numeric(12,2);
+
 -- 2. Table for settings (workshop name on the PDFs) --------------------------
 create table if not exists public.settings (
   id       int primary key default 1 check (id = 1),

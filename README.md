@@ -18,8 +18,9 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 - **Nr.**: an automatic 4-digit number, starting at **1000**. Assigned by the database when a piece is first saved. It can't be changed, and numbers of deleted pieces are not reused.
 - **Name**, **Fotos** (up to four, shown as a 2×2 gallery; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px), **Beschreibung**
 - *Separator line*
-- **Steine** (hint: Preis, Karat, Größe, wann bei wem gekauft) + **Preis** (€)
+- **Steine** (single line; hint: Preis, Karat, Größe, wann bei wem gekauft) + **Preis** (€)
 - **Gold** (hint: Datum und Preis) + **Preis** (€)
+- **Silber** + **Preis** (€)
 - **Fasser** + **Preis** (€)
 - **3D Druck** + **Preis** (€)
 - **Extern (AZ/Material)** + **Preis** (€)  *(stored in the database column `willi` / `willi_preis`)*
@@ -35,7 +36,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 ### PDFs
 - **PDF herunterladen**: two pages.
   - Page 1: name, photos (one photo large, two to four as a 2×2 gallery), Beschreibung, separator line
-  - Page 2: Steine, Gold, Fasser, 3D Druck, Extern, Arbeitszeit (each with its Preis on the same line), Verkaufspreis bottom right, Kommentar
+  - Page 2: Steine, Gold, Silber, Fasser, 3D Druck, Extern, Arbeitszeit (each with its Preis on the same line), Verkaufspreis bottom right, Kommentar
 - **PDF Seite 1**: page 1 only (for customers).
 - **Ganzen Katalog herunterladen (PDF)**: all pieces in one file.
 - Every page has **fanijansen fine jewellery** at the top left and the piece number at the top right. File names start with the number, e.g. `1000 Ring 1.pdf`.
