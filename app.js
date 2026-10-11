@@ -4,8 +4,8 @@ const $ = s => document.querySelector(s);
 
 /* ---------- fields ---------- */
 const TEXT_FIELDS  = ["name","beschreibung","steine","gold","fasser","druck","willi","arbeitszeit","kommentar"];
-const PRICE_FIELDS = ["gold_preis","fasser_preis","druck_preis","willi_preis","arbeitszeit_preis"];
-const PRICE_LABELS = {gold_preis:"Gold",fasser_preis:"Fasser",druck_preis:"3D Druck",willi_preis:"Willi",arbeitszeit_preis:"Arbeitszeit"};
+const PRICE_FIELDS = ["steine_preis","gold_preis","fasser_preis","druck_preis","willi_preis","arbeitszeit_preis"];
+const PRICE_LABELS = {steine_preis:"Steine",gold_preis:"Gold",fasser_preis:"Fasser",druck_preis:"3D Druck",willi_preis:"Extern",arbeitszeit_preis:"Arbeitszeit"};
 const BUCKET = "photos";
 
 /* ---------- state ---------- */
@@ -361,7 +361,7 @@ async function drawPiece(doc,p,opts){
   };
   if(p.beschreibung){paragraphs("BESCHREIBUNG",p.beschreibung);y+=2;}
   // each row: label, text field, and its Preis on the same line (right-hand price column)
-  const GROUPS=[["Steine","steine",null],["Gold","gold","gold_preis"],["Fasser","fasser","fasser_preis"],["3D Druck","druck","druck_preis"],["Willi (AZ/Material)","willi","willi_preis"],["Arbeitszeit","arbeitszeit","arbeitszeit_preis"]];
+  const GROUPS=[["Steine","steine","steine_preis"],["Gold","gold","gold_preis"],["Fasser","fasser","fasser_preis"],["3D Druck","druck","druck_preis"],["Extern (AZ/Material)","willi","willi_preis"],["Arbeitszeit","arbeitszeit","arbeitszeit_preis"]];
   const has=v=>v!==null&&v!==undefined&&String(v).trim()!=="";
   const rows=GROUPS.filter(g=>has(p[g[1]])||(g[2]&&has(p[g[2]])));
   const price=has(p.verkaufspreis)?p.verkaufspreis:null;

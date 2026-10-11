@@ -30,6 +30,9 @@ create table if not exists public.pieces (
 alter table public.pieces
   add column if not exists nummer integer generated always as identity (start with 1000) unique;
 
+-- 1c. Preis next to Steine (added later)
+alter table public.pieces add column if not exists steine_preis numeric(12,2);
+
 -- 2. Table for settings (workshop name on the PDFs) --------------------------
 create table if not exists public.settings (
   id       int primary key default 1 check (id = 1),

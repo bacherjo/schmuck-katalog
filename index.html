@@ -74,7 +74,7 @@ input[aria-invalid="true"]{border-color:var(--bad)}
 hr.sep{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
 .costs{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
 .costs .field{width:min(380px,100%)}
-.costs .field.wide-text{width:min(600px,100%)}
+.costs .field.wide-text{width:min(380px,100%)}
 .costs textarea{min-height:96px}
 .costs .pair{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 16px;width:100%}
 .costs .pair .field.euro{width:min(200px,100%)}
@@ -223,7 +223,10 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
         <hr class="sep">
 
         <div class="costs">
-          <div class="field wide-text"><label for="f-steine">Steine</label><textarea id="f-steine" aria-describedby="steine-hint"></textarea><span class="hint" id="steine-hint">Preis, Karat, Größe, wann bei wem gekauft</span></div>
+          <div class="pair">
+            <div class="field wide-text"><label for="f-steine">Steine</label><textarea id="f-steine" aria-describedby="steine-hint"></textarea><span class="hint" id="steine-hint">Preis, Karat, Größe, wann bei wem gekauft</span></div>
+            <div class="field euro"><label for="f-steine_preis">Preis</label><div class="unit"><input id="f-steine_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
+          </div>
           <div class="pair">
             <div class="field"><label for="f-gold">Gold</label><input id="f-gold" aria-describedby="gold-hint"><span class="hint" id="gold-hint">Datum und Preis</span></div>
             <div class="field euro"><label for="f-gold_preis">Preis</label><div class="unit"><input id="f-gold_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
@@ -237,7 +240,7 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
             <div class="field euro"><label for="f-druck_preis">Preis</label><div class="unit"><input id="f-druck_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
           </div>
           <div class="pair">
-            <div class="field"><label for="f-willi">Willi (AZ/Material)</label><input id="f-willi"></div>
+            <div class="field"><label for="f-willi">Extern (AZ/Material)</label><input id="f-willi"></div>
             <div class="field euro"><label for="f-willi_preis">Preis</label><div class="unit"><input id="f-willi_preis" class="mono" inputmode="decimal" placeholder="0"><span>€</span></div></div>
           </div>
           <div class="pair">
