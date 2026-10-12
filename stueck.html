@@ -32,6 +32,11 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);l
 .photos.one{grid-template-columns:minmax(0,1fr)}
 .photos figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
 .photos img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+/* photo zoom (zoom.js) */
+img.zoomable{cursor:zoom-in;transition:transform .12s ease-out;will-change:transform}
+img.zoomable.zoomed{cursor:zoom-out}
+@media (prefers-reduced-motion:reduce){img.zoomable{transition:none}}
+
 .label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .desc{font-family:var(--f-display);font-size:18px;line-height:1.6;max-width:65ch;white-space:pre-line;margin:6px 0 0}
 .msg{max-width:520px;margin:12vh auto 0;text-align:center;color:var(--muted)}
@@ -54,6 +59,7 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);l
 
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
+<script src="zoom.js"></script>
 <script>
 (async function(){
   const $=s=>document.querySelector(s);
@@ -76,7 +82,7 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);l
     const box=$("#photos"); if(paths.length===1) box.classList.add("one");
     (urls||[]).forEach((u,i)=>{
       if(!u.signedUrl) return;
-      const f=document.createElement("figure"); const img=document.createElement("img");
+      const f=document.createElement("figure"); const img=document.createElement("img"); img.className="zoomable";
       img.src=u.signedUrl; img.alt=(p.name||"Schmuckstück")+" – Foto "+(i+1);
       f.appendChild(img); box.appendChild(f);
     });

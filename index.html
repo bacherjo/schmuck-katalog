@@ -105,6 +105,11 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 .photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .slot{position:relative;aspect-ratio:4/3;max-width:100%;border:1px dashed var(--line);border-radius:var(--r);background:var(--sunk);overflow:hidden;display:grid;place-items:center}
 .slot img{width:100%;height:100%;object-fit:contain;display:block}
+/* photo zoom (zoom.js) */
+img.zoomable{cursor:zoom-in;transition:transform .12s ease-out;will-change:transform}
+img.zoomable.zoomed{cursor:zoom-out}
+@media (prefers-reduced-motion:reduce){img.zoomable{transition:none}}
+
 .slot .add{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:13px;text-align:center;padding:12px;cursor:pointer;width:100%;height:100%;justify-content:center;border:0;background:transparent}
 .slot .add:hover{color:var(--fg)}
 .slot .add b{font-size:26px;font-weight:300;line-height:1}
@@ -279,5 +284,6 @@ button{font:inherit;font-size:14px;cursor:pointer;border-radius:4px}
 <script src="vendor/supabase.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
+<script src="zoom.js"></script>
 </body>
 </html>

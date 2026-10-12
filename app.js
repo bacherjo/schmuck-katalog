@@ -172,7 +172,7 @@ function renderPhotos(){
   for(let i=0;i<MAX_PHOTOS;i++){
     const id=current.photos[i]; const slot=document.createElement("div"); slot.className="slot";
     if(id){
-      slot.innerHTML=`<img data-photo="${esc(id)}" alt="Foto ${i+1}">${i===0?'<span class="badge">Hauptfoto</span>':""}<button type="button" class="btn small rm">Entfernen</button>`;
+      slot.innerHTML=`<img class="zoomable" data-photo="${esc(id)}" alt="Foto ${i+1}">${i===0?'<span class="badge">Hauptfoto</span>':""}<button type="button" class="btn small rm">Entfernen</button>`;
       slot.querySelector(".rm").onclick=()=>{current.photos.splice(i,1);renderPhotos();};
     } else {
       // empty frames fill up from the front, so the photos stay in order
