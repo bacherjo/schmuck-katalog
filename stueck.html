@@ -30,6 +30,8 @@ img{max-width:100%}
 h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);line-height:1.1;margin:8px 0 0;text-wrap:balance}
 .photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .photos.one{grid-template-columns:minmax(0,1fr)}
+/* phones: one large photo per row */
+@media (max-width:600px){.photos{grid-template-columns:minmax(0,1fr)}}
 .photos figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
 .photos img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
 /* photo zoom (zoom.js) */

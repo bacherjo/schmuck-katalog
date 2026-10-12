@@ -16,7 +16,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 
 ### The form (one entry per piece)
 - **Nr.**: an automatic 4-digit number, starting at **1000**. Assigned by the database when a piece is first saved. It can't be changed, and numbers of deleted pieces are not reused.
-- **Name**, **Fotos** (up to four, shown as a 2×2 gallery; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px). **Zoom:** hover over a photo with the mouse to magnify it 2.5× at the cursor; on phones and tablets, tap to zoom in, drag with the finger to move around the enlarged photo, and tap again to zoom out (also on the e-mail link page), **Beschreibung**
+- **Name**, **Fotos** (up to four, shown as a 2×2 gallery on computers and tablets and one below the other at full width on smartphones; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px). **Zoom:** hover over a photo with the mouse to magnify it 2.5× at the cursor; on phones and tablets, tap to zoom in, drag with the finger to move around the enlarged photo, and tap again to zoom out (also on the e-mail link page), **Beschreibung**
 - *Separator line*
 - **Steine** (single line; hint: Preis, Karat, Größe, wann bei wem gekauft) + **Preis** (€)
 - **Gold** (hint: Datum und Preis) + **Preis** (€)

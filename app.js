@@ -170,7 +170,7 @@ let targetSlot=0;
 function renderPhotos(){
   const box=$("#photos"); box.innerHTML="";
   for(let i=0;i<MAX_PHOTOS;i++){
-    const id=current.photos[i]; const slot=document.createElement("div"); slot.className="slot";
+    const id=current.photos[i]; const slot=document.createElement("div"); slot.className=id?"slot":"slot empty";
     if(id){
       slot.innerHTML=`<img class="zoomable" data-photo="${esc(id)}" alt="Foto ${i+1}">${i===0?'<span class="badge">Hauptfoto</span>':""}<button type="button" class="btn small rm">Entfernen</button>`;
       slot.querySelector(".rm").onclick=()=>{current.photos.splice(i,1);renderPhotos();};
