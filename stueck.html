@@ -34,7 +34,8 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);l
 .photos img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
 /* photo zoom (zoom.js) */
 img.zoomable{cursor:zoom-in;transition:transform .12s ease-out;will-change:transform}
-img.zoomable.zoomed{cursor:zoom-out}
+img.zoomable.zoomed{cursor:zoom-out;touch-action:none}
+img.zoomable.panning{transition:none}
 @media (prefers-reduced-motion:reduce){img.zoomable{transition:none}}
 
 .label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}

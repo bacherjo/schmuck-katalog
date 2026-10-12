@@ -16,7 +16,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 
 ### The form (one entry per piece)
 - **Nr.**: an automatic 4-digit number, starting at **1000**. Assigned by the database when a piece is first saved. It can't be changed, and numbers of deleted pieces are not reused.
-- **Name**, **Fotos** (up to four, shown as a 2×2 gallery; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px). **Zoom:** hover over a photo with the mouse to magnify it 2.5× at the cursor; on phones and tablets, tap to zoom in and tap again to zoom out (also on the e-mail link page), **Beschreibung**
+- **Name**, **Fotos** (up to four, shown as a 2×2 gallery; the first one is the Hauptfoto used in the list; large photos are reduced to 2000 px). **Zoom:** hover over a photo with the mouse to magnify it 2.5× at the cursor; on phones and tablets, tap to zoom in, drag with the finger to move around the enlarged photo, and tap again to zoom out (also on the e-mail link page), **Beschreibung**
 - *Separator line*
 - **Steine** (single line; hint: Preis, Karat, Größe, wann bei wem gekauft) + **Preis** (€)
 - **Gold** (hint: Datum und Preis) + **Preis** (€)
@@ -66,7 +66,7 @@ A catalogue for jewellery pieces. The page is hosted on **Vercel**, data and pho
 |---|---|
 | `index.html` | The catalogue: login, form, list (layout and styles) |
 | `app.js` | The program: saving, photos, numbers, search, PDFs, e-mail links, backup, import |
-| `zoom.js` | Photo zoom (hover with the mouse, tap on touch screens) |
+| `zoom.js` | Photo zoom (hover with the mouse; tap and drag on touch screens) |
 | `stueck.html` | Public page behind the e-mail link (page 1 content only, no login) |
 | `config.js` | Supabase address and publishable key (already filled in) |
 | `supabase/setup.sql` | Database setup: tables, piece number, photo storage, security rules, share links |
